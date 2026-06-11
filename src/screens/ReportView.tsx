@@ -5,7 +5,6 @@ import {
   entryHours,
   entryMonthKey,
   entryPay,
-  entryTips,
   formatMonthLabel,
   formatNum,
   monthTotal,
@@ -69,7 +68,6 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
               <th>Время</th>
               <th>Обед</th>
               <th className="num">Часы</th>
-              <th className="num">Чаевые €</th>
               <th className="num">Сумма €</th>
             </tr>
           </thead>
@@ -77,7 +75,6 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
             {visible.map((e) => {
               const h = entryHours(e);
               const sum = entryPay(e, worker);
-              const tip = entryTips(e);
               const times = [
                 `${e.start}–${e.end}`,
                 ...(e.extraSegments?.map((s) => `${s.start}–${s.end}`) ?? []),
@@ -89,7 +86,6 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
                   <td className="nowrap">{times}</td>
                   <td>{e.lunch ? '30 мин' : '—'}</td>
                   <td className="num">{formatNum(h)}</td>
-                  <td className="num">{tip > 0 ? formatNum(tip) : ''}</td>
                   <td className="num">{formatNum(sum)}</td>
                 </tr>
               );
@@ -99,7 +95,6 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
             <tr>
               <td colSpan={4}>ИТОГО</td>
               <td className="num">{formatNum(total.hours)}</td>
-              <td className="num">{formatNum(total.tips)}</td>
               <td className="num">{formatNum(total.pay)}</td>
             </tr>
           </tfoot>
@@ -109,10 +104,6 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
           <div className="summary-block">
             <div className="summary-label">Всего часов</div>
             <div className="summary-value">{formatNum(total.hours)}</div>
-          </div>
-          <div className="summary-block">
-            <div className="summary-label">Чаевые</div>
-            <div className="summary-value">€{formatNum(total.tips)}</div>
           </div>
           <div className="summary-block accent">
             <div className="summary-label">К выплате</div>

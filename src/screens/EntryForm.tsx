@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Entry, Segment, Worker } from '../types';
 import { entryHours, formatNum, ymd } from '../calc';
-import { PhotoPicker } from '../components/PhotoPicker';
 
 type Props = {
   worker: Worker;
@@ -32,14 +31,10 @@ export function EntryForm({
   const [hourly, setHourly] = useState<string>(
     String(existing?.hourly ?? defaults.hourly),
   );
-  const [tips, setTips] = useState<string>(
-    existing?.tips ? String(existing.tips) : '',
-  );
   const [multiplier, setMultiplier] = useState<number>(existing?.multiplier ?? 1);
   const [extraSegments, setExtraSegments] = useState<Segment[]>(
     existing?.extraSegments ?? [],
   );
-  const [photos, setPhotos] = useState<string[]>(existing?.photos ?? []);
 
   function updateSegment(i: number, patch: Partial<Segment>) {
     setExtraSegments((prev) =>
@@ -75,6 +70,7 @@ export function EntryForm({
   const num = (s: string) => parseFloat(s.replace(',', '.')) || 0;
   const pay = Math.round(hours * num(hourly) * 100) / 100;
 
+
   const cleanedExtras: Segment[] = extraSegments
     .map((s) => ({ start: s.start, end: s.end }))
     .filter((s) => s.start !== '' && s.end !== '');
@@ -89,10 +85,8 @@ export function EntryForm({
       end,
       lunch,
       hourly: num(hourly),
-      tips: num(tips) || undefined,
       multiplier,
       extraSegments: cleanedExtras.length ? cleanedExtras : undefined,
-      photos: photos.length ? photos : undefined,
     });
   }
 
@@ -197,36 +191,19 @@ export function EntryForm({
           </datalist>
         </label>
 
-        <div className="field-row">
-          <label className="field">
-            <span>Ставка €/ч</span>
-            <input
-              type="text"
-              inputMode="decimal"
-              value={hourly}
-              onChange={(e) => setHourly(e.target.value)}
-            />
-          </label>
-          <label className="field">
-            <span>Чаевые €</span>
-            <input
-              type="text"
-              inputMode="decimal"
-              value={tips}
-              onChange={(e) => setTips(e.target.value)}
-              placeholder="0"
-            />
-          </label>
-        </div>
-
-        <PhotoPicker photos={photos} onChange={setPhotos} />
+        <label className="field">
+          <span>Ставка €/ч</span>
+          <input
+            type="text"
+            inputMode="decimal"
+            value={hourly}
+            onChange={(e) => setHourly(e.target.value)}
+          />
+        </label>
 
         <div className="preview">
           <div>Чистое время: <strong>{formatNum(hours)} ч</strong></div>
           <div className="preview-pay">Зарплата: <strong>€{formatNum(pay)}</strong></div>
-          {num(tips) > 0 && (
-            <div className="preview-tips">Чаевые: <strong>€{formatNum(num(tips))}</strong></div>
-          )}
         </div>
 
         {onDuplicate && (

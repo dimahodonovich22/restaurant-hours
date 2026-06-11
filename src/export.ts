@@ -1,20 +1,17 @@
 import * as XLSX from 'xlsx';
 import type { Entry, Worker } from './types';
-import { ddmm, entryHours, entryPay, entryTips, formatMonthLabel } from './calc';
+import { ddmm, entryHours, entryPay, formatMonthLabel } from './calc';
 
 export function exportExcel(worker: Worker, entries: Entry[], monthKey: string): void {
   const sorted = entries.slice().sort((a, b) => (a.date < b.date ? -1 : 1));
 
   let totalHours = 0;
-  let totalTips = 0;
   let totalPay = 0;
 
   const rows = sorted.map((e) => {
     const hours = entryHours(e);
     const sum = entryPay(e, worker);
-    const tip = entryTips(e);
     totalHours += hours;
-    totalTips += tip;
     totalPay += sum;
     const times = [
       `${e.start}–${e.end}`,
@@ -26,7 +23,6 @@ export function exportExcel(worker: Worker, entries: Entry[], monthKey: string):
       Время: times,
       Обед: e.lunch ? '30 мин' : 'без обеда',
       'Часы': hours,
-      'Чаевые €': tip,
       'Сумма €': sum,
     };
   });
@@ -39,7 +35,6 @@ export function exportExcel(worker: Worker, entries: Entry[], monthKey: string):
     Время: '',
     Обед: '',
     Часы: Math.round(totalHours * 100) / 100,
-    'Чаевые €': Math.round(totalTips * 100) / 100,
     'Сумма €': totalPay,
   });
 
@@ -50,13 +45,12 @@ export function exportExcel(worker: Worker, entries: Entry[], monthKey: string):
     { wch: 18 }, // время
     { wch: 12 }, // обед
     { wch: 8 },  // часы
-    { wch: 10 }, // чаевые
     { wch: 12 }, // сумма
   ];
 
   // Жирная нижняя строка с итогами
   const lastRow = rows.length + 1; // +1 для заголовка
-  ['A','B','C','D','E','F','G'].forEach((col) => {
+  ['A','B','C','D','E','F'].forEach((col) => {
     const cell = ws[`${col}${lastRow}`];
     if (cell) {
       cell.s = { font: { bold: true } };

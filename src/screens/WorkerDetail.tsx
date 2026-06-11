@@ -5,7 +5,6 @@ import {
   entryHours,
   entryMonthKey,
   entryPay,
-  entryTips,
   formatMonthLabel,
   formatNum,
   monthTotal,
@@ -96,14 +95,10 @@ export function WorkerDetail({
           `${e.start}-${e.end}`,
           ...(e.extraSegments?.map((s) => `${s.start}-${s.end}`) ?? []),
         ].join(' · ');
-        const tip = entryTips(e) > 0 ? ` (чай €${formatNum(entryTips(e))})` : '';
-        return `${ddmm(e.date)}${label}${lunch}   ${times}/${formatNum(entryHours(e))}ч${tip}`;
+        return `${ddmm(e.date)}${label}${lunch}   ${times}/${formatNum(entryHours(e))}ч`;
       });
     lines.push('');
-    lines.push(
-      `Итого: ${formatNum(total.hours)} ч / зарплата €${formatNum(total.pay)}` +
-        (total.tips > 0 ? ` / чаевые €${formatNum(total.tips)}` : ''),
-    );
+    lines.push(`Итого: ${formatNum(total.hours)} ч / €${formatNum(total.pay)}`);
     const text = lines.join('\n');
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text).then(
@@ -133,7 +128,6 @@ export function WorkerDetail({
 
       <div className="totals">
         <div><span>{formatNum(total.hours)}</span> ч</div>
-        {total.tips > 0 && <div><span>€{formatNum(total.tips)}</span> чай</div>}
         <div className="pay"><span>€{formatNum(total.pay)}</span></div>
       </div>
 
@@ -144,7 +138,6 @@ export function WorkerDetail({
           {visible.map((e) => {
             const h = entryHours(e);
             const pay = entryPay(e, worker);
-            const tip = entryTips(e);
             return (
               <li key={e.id} className="entry-row" onClick={() => onEditEntry(e.id)}>
                 <div className="entry-date">{ddmm(e.date)}</div>
@@ -154,10 +147,6 @@ export function WorkerDetail({
                     {!e.lunch && <span className="entry-no-lunch">без обеда</span>}
                     {e.multiplier && e.multiplier !== 1 && (
                       <span className="entry-mult">× {e.multiplier}</span>
-                    )}
-                    {tip > 0 && <span className="entry-tip">💶 €{formatNum(tip)}</span>}
-                    {e.photos && e.photos.length > 0 && (
-                      <span className="entry-photo">📎 {e.photos.length}</span>
                     )}
                   </div>
                   <div className="entry-time">

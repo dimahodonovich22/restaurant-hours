@@ -14,12 +14,10 @@ export type Entry = {
   end: string;      // HH:mm
   lunch: boolean;   // true → вычесть 30 мин
   hourly?: number;  // €/ч за эту смену
-  tips?: number;    // чаевые €, считаются отдельно от зарплаты
   multiplier?: number; // 1 | 1.5 | 2 — коэффициент для часов (ночь/праздники)
   // Дополнительные отрезки времени в тот же день (разрыв смены: утро + вечер).
   // Часы суммируются с основным сегментом, обед вычитается один раз за день.
   extraSegments?: Segment[];
-  photos?: string[]; // data URL'ы (JPEG, сжатые)
 };
 
 export type Segment = {

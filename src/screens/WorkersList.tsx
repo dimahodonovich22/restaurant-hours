@@ -80,7 +80,6 @@ export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetO
                   <div className="card-name">{w.name}</div>
                   <div className="card-stats">
                     <span>{formatNum(t.hours)} ч</span>
-                    {t.tips > 0 && <span>💶 €{formatNum(t.tips)}</span>}
                     <span className="pay">€{formatNum(t.pay)}</span>
                   </div>
                   <div className="card-sub">{t.count} {pluralizeRecords(t.count)}</div>
@@ -94,16 +93,15 @@ export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetO
               (acc, w) => {
                 const t = monthTotal(state.entries, w, month);
                 acc.hours += t.hours;
-                acc.tips += t.tips;
                 acc.count += t.count;
                 return acc;
               },
-              { hours: 0, tips: 0, count: 0 },
+              { hours: 0, count: 0 },
             );
             const round = (n: number) => Math.round(n * 100) / 100;
             const rateH = state.overviewRates?.hourly ?? 0;
             const payH = round(totals.hours * rateH);
-            const payTotal = round(payH + totals.tips);
+            const payTotal = payH;
 
             const askRate = () => {
               const input = prompt('Ставка €/час', rateH ? String(rateH) : '');
@@ -132,15 +130,10 @@ export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetO
                       <div className="overview-rate">× €{formatNum(rateH)}/ч</div>
                     )}
                   </button>
-                  <div className="overview-cell overview-cell-static">
-                    <span>€{formatNum(round(totals.tips))}</span>
-                    <div className="overview-unit">чаевые</div>
-                    <div className="overview-sub">за месяц</div>
-                  </div>
                   <div className="pay overview-cell overview-cell-static">
                     <span>€{formatNum(payTotal)}</span>
                     <div className="overview-unit">всего</div>
-                    <div className="overview-sub">зарплата + чаевые</div>
+                    <div className="overview-sub">часы × ставка</div>
                   </div>
                 </div>
                 <div className="grand-total-sub">

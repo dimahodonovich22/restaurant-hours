@@ -42,7 +42,6 @@ export function entryMonthKey(dateStr: string): string {
 export type MonthTotal = {
   hours: number;
   pay: number;
-  tips: number;
   count: number;
 };
 
@@ -57,27 +56,20 @@ export function entryPay(e: Entry, worker: Worker): number {
   return Math.round(entryHours(e) * hourly * 100) / 100;
 }
 
-export function entryTips(e: Entry): number {
-  return Math.round((e.tips || 0) * 100) / 100;
-}
-
 export function monthTotal(entries: Entry[], worker: Worker, monthKey: string): MonthTotal {
   let hours = 0;
   let pay = 0;
-  let tips = 0;
   let count = 0;
   for (const e of entries) {
     if (e.workerId !== worker.id) continue;
     if (entryMonthKey(e.date) !== monthKey) continue;
     hours += entryHours(e);
     pay += entryPay(e, worker);
-    tips += entryTips(e);
     count += 1;
   }
   return {
     hours: Math.round(hours * 100) / 100,
     pay: Math.round(pay * 100) / 100,
-    tips: Math.round(tips * 100) / 100,
     count,
   };
 }
