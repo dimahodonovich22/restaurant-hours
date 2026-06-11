@@ -6,8 +6,8 @@ import { PhotoPicker } from '../components/PhotoPicker';
 type Props = {
   worker: Worker;
   existing?: Entry;
-  knownLocations: string[];
-  defaults: { hourly: number; perKm: number; km: number };
+  knownComments: string[];
+  defaults: { hourly: number };
   onCancel: () => void;
   onSave: (data: Omit<Entry, 'id' | 'workerId'>) => void;
   onDuplicate?: () => void;
@@ -17,7 +17,7 @@ type Props = {
 export function EntryForm({
   worker,
   existing,
-  knownLocations,
+  knownComments,
   defaults,
   onCancel,
   onSave,
@@ -25,18 +25,15 @@ export function EntryForm({
   onDelete,
 }: Props) {
   const [date, setDate] = useState(existing?.date ?? ymd(new Date()));
-  const [location, setLocation] = useState(existing?.location ?? '');
+  const [comment, setComment] = useState(existing?.comment ?? '');
   const [start, setStart] = useState(existing?.start ?? '08:00');
   const [end, setEnd] = useState(existing?.end ?? '16:30');
   const [lunch, setLunch] = useState(existing?.lunch ?? true);
-  const [km, setKm] = useState<string>(
-    existing ? String(existing.km) : String(defaults.km),
-  );
   const [hourly, setHourly] = useState<string>(
     String(existing?.hourly ?? defaults.hourly),
   );
-  const [perKm, setPerKm] = useState<string>(
-    String(existing?.perKm ?? defaults.perKm),
+  const [tips, setTips] = useState<string>(
+    existing?.tips ? String(existing.tips) : '',
   );
   const [multiplier, setMultiplier] = useState<number>(existing?.multiplier ?? 1);
   const [extraSegments, setExtraSegments] = useState<Segment[]>(
@@ -50,10 +47,7 @@ export function EntryForm({
     );
   }
   function addSegment() {
-    setExtraSegments((prev) => [
-      ...prev,
-      { location: '', start: end, end: end },
-    ]);
+    setExtraSegments((prev) => [...prev, { start: end, end: end }]);
   }
   function removeSegment(i: number) {
     setExtraSegments((prev) => prev.filter((_, idx) => idx !== i));
@@ -69,36 +63,33 @@ export function EntryForm({
         id: '',
         workerId: '',
         date,
-        location,
         start,
         end,
         lunch,
-        km: 0,
         multiplier,
         extraSegments,
       }),
-    [date, location, start, end, lunch, multiplier, extraSegments],
+    [date, start, end, lunch, multiplier, extraSegments],
   );
 
   const num = (s: string) => parseFloat(s.replace(',', '.')) || 0;
-  const pay = Math.round((hours * num(hourly) + num(km) * num(perKm)) * 100) / 100;
+  const pay = Math.round(hours * num(hourly) * 100) / 100;
 
   const cleanedExtras: Segment[] = extraSegments
-    .map((s) => ({ location: s.location.trim(), start: s.start, end: s.end }))
-    .filter((s) => s.location !== '' && s.start !== '' && s.end !== '');
+    .map((s) => ({ start: s.start, end: s.end }))
+    .filter((s) => s.start !== '' && s.end !== '');
 
-  const canSave = location.trim() !== '' && start !== '' && end !== '';
+  const canSave = start !== '' && end !== '';
 
   function handleSave() {
     onSave({
       date,
-      location: location.trim(),
+      comment: comment.trim() || undefined,
       start,
       end,
       lunch,
-      km: num(km),
       hourly: num(hourly),
-      perKm: num(perKm),
+      tips: num(tips) || undefined,
       multiplier,
       extraSegments: cleanedExtras.length ? cleanedExtras : undefined,
       photos: photos.length ? photos : undefined,
@@ -109,7 +100,7 @@ export function EntryForm({
     <div className="screen">
       <header className="topbar">
         <button className="link" onClick={onCancel}>Отмена</button>
-        <h1>{existing ? 'Редактировать' : 'Новая запись'}</h1>
+        <h1>{existing ? 'Редактировать' : 'Новая смена'}</h1>
         <button className="link" disabled={!canSave} onClick={handleSave}>Сохранить</button>
       </header>
 
@@ -119,20 +110,6 @@ export function EntryForm({
         <label className="field">
           <span>Дата</span>
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-        </label>
-
-        <label className="field">
-          <span>Локация</span>
-          <input
-            type="text"
-            list="locations"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="парковка, школа, Гент..."
-          />
-          <datalist id="locations">
-            {knownLocations.map((l) => <option key={l} value={l} />)}
-          </datalist>
         </label>
 
         <div className="field-row">
@@ -149,21 +126,11 @@ export function EntryForm({
         {extraSegments.map((seg, i) => (
           <div key={i} className="segment">
             <div className="segment-header">
-              <span>Объект {i + 2}</span>
+              <span>Отрезок {i + 2}</span>
               <button type="button" className="segment-remove" onClick={() => removeSegment(i)}>
                 Удалить
               </button>
             </div>
-            <label className="field">
-              <span>Локация</span>
-              <input
-                type="text"
-                list="locations"
-                value={seg.location}
-                onChange={(e) => updateSegment(i, { location: e.target.value })}
-                placeholder="ещё один объект..."
-              />
-            </label>
             <div className="field-row">
               <label className="field">
                 <span>Начало</span>
@@ -186,7 +153,7 @@ export function EntryForm({
         ))}
 
         <button type="button" className="ghost add-segment" onClick={addSegment}>
-          + Добавить локацию
+          + Добавить отрезок (разрыв смены)
         </button>
 
         <label className="field-check">
@@ -217,14 +184,17 @@ export function EntryForm({
         </div>
 
         <label className="field">
-          <span>Километры</span>
+          <span>Участок / комментарий</span>
           <input
             type="text"
-            inputMode="decimal"
-            value={km}
-            onChange={(e) => setKm(e.target.value)}
-            placeholder="0"
+            list="comments"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="зал, кухня, бар…"
           />
+          <datalist id="comments">
+            {knownComments.map((c) => <option key={c} value={c} />)}
+          </datalist>
         </label>
 
         <div className="field-row">
@@ -238,12 +208,13 @@ export function EntryForm({
             />
           </label>
           <label className="field">
-            <span>Ставка €/км</span>
+            <span>Чаевые €</span>
             <input
               type="text"
               inputMode="decimal"
-              value={perKm}
-              onChange={(e) => setPerKm(e.target.value)}
+              value={tips}
+              onChange={(e) => setTips(e.target.value)}
+              placeholder="0"
             />
           </label>
         </div>
@@ -252,12 +223,15 @@ export function EntryForm({
 
         <div className="preview">
           <div>Чистое время: <strong>{formatNum(hours)} ч</strong></div>
-          <div className="preview-pay">К начислению: <strong>€{formatNum(pay)}</strong></div>
+          <div className="preview-pay">Зарплата: <strong>€{formatNum(pay)}</strong></div>
+          {num(tips) > 0 && (
+            <div className="preview-tips">Чаевые: <strong>€{formatNum(num(tips))}</strong></div>
+          )}
         </div>
 
         {onDuplicate && (
           <button className="ghost" onClick={onDuplicate}>
-            Дублировать запись
+            Дублировать смену
           </button>
         )}
 
@@ -265,10 +239,10 @@ export function EntryForm({
           <button
             className="danger"
             onClick={() => {
-              if (confirm('Удалить запись?')) onDelete();
+              if (confirm('Удалить смену?')) onDelete();
             }}
           >
-            Удалить запись
+            Удалить смену
           </button>
         )}
       </div>

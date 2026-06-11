@@ -16,9 +16,7 @@ export function WorkerForm({ existing, onCancel, onSave, onDelete }: Props) {
   function handleSave() {
     onSave({
       name: name.trim(),
-      // Сохраняем старые ставки, если работник уже существовал — для совместимости со старыми записями.
       hourly: existing?.hourly,
-      perKm: existing?.perKm,
     });
   }
 
@@ -26,7 +24,7 @@ export function WorkerForm({ existing, onCancel, onSave, onDelete }: Props) {
     <div className="screen">
       <header className="topbar">
         <button className="link" onClick={onCancel}>Отмена</button>
-        <h1>{existing ? 'Работник' : 'Новый работник'}</h1>
+        <h1>{existing ? 'Сотрудник' : 'Новый сотрудник'}</h1>
         <button className="link" disabled={!canSave} onClick={handleSave}>Сохранить</button>
       </header>
 
@@ -43,17 +41,17 @@ export function WorkerForm({ existing, onCancel, onSave, onDelete }: Props) {
         </label>
 
         <div className="form-hint">
-          Ставка €/ч и €/км задаются при добавлении каждой записи — они могут отличаться от объекта к объекту.
+          Ставка €/ч задаётся при добавлении каждой смены — она подставляется из последней смены.
         </div>
 
         {onDelete && (
           <button
             className="danger"
             onClick={() => {
-              if (confirm('Удалить работника и все его записи?')) onDelete();
+              if (confirm('Удалить сотрудника и все его смены?')) onDelete();
             }}
           >
-            Удалить работника
+            Удалить сотрудника
           </button>
         )}
       </div>

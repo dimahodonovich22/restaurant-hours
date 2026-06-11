@@ -1,31 +1,28 @@
 export type Worker = {
   id: string;
   name: string;
-  // Сохраняются для обратной совместимости со старыми записями.
+  // Сохраняется для подстановки ставки по умолчанию в новую смену.
   hourly?: number;
-  perKm?: number;
 };
 
 export type Entry = {
   id: string;
   workerId: string;
   date: string;     // YYYY-MM-DD
-  location: string;
+  comment?: string; // необязательный тег смены: зал / кухня / бар…
   start: string;    // HH:mm
   end: string;      // HH:mm
   lunch: boolean;   // true → вычесть 30 мин
-  km: number;
-  hourly?: number;  // €/ч за этот день
-  perKm?: number;   // €/км за этот день
-  multiplier?: number; // 1 | 1.5 | 2 — коэффициент для часов
-  // Дополнительные объекты в этот же день, у каждого своё время.
+  hourly?: number;  // €/ч за эту смену
+  tips?: number;    // чаевые €, считаются отдельно от зарплаты
+  multiplier?: number; // 1 | 1.5 | 2 — коэффициент для часов (ночь/праздники)
+  // Дополнительные отрезки времени в тот же день (разрыв смены: утро + вечер).
   // Часы суммируются с основным сегментом, обед вычитается один раз за день.
   extraSegments?: Segment[];
   photos?: string[]; // data URL'ы (JPEG, сжатые)
 };
 
 export type Segment = {
-  location: string;
   start: string;
   end: string;
 };
@@ -44,9 +41,8 @@ export type AppState = {
   workers: Worker[];
   entries: Entry[];
   notes: Note[];
-  // Ставки для общей плашки на главном экране (независимы от ставок в записях).
+  // Ставка для общей плашки на главном экране (независима от ставок в сменах).
   overviewRates?: {
     hourly: number;
-    perKm: number;
   };
 };

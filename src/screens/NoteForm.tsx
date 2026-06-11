@@ -96,7 +96,7 @@ export function NoteForm({ worker, existing, onCancel, onSave, onDelete }: Props
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Например: заправка для личных нужд на Total"
+            placeholder="Например: аванс, штраф, разбитая посуда"
             rows={3}
           />
         </label>

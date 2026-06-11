@@ -75,7 +75,7 @@ export function App() {
     setState(next);
   }
 
-  function setOverviewRates(rates: { hourly: number; perKm: number }) {
+  function setOverviewRates(rates: { hourly: number }) {
     setState((s) => ({ ...s, overviewRates: rates }));
   }
 
@@ -152,15 +152,13 @@ export function App() {
       .sort((a, b) => (a.date < b.date ? 1 : -1))[0];
     const defaults = {
       hourly: lastForWorker?.hourly ?? worker.hourly ?? 15,
-      perKm: lastForWorker?.perKm ?? worker.perKm ?? 0,
-      km: lastForWorker?.km ?? 15,
     };
     return (
       <EntryForm
         key={existing?.id ?? 'new'}
         worker={worker}
         existing={existing}
-        knownLocations={Array.from(new Set(state.entries.map((e) => e.location).filter(Boolean)))}
+        knownComments={Array.from(new Set(state.entries.map((e) => e.comment).filter((c): c is string => !!c)))}
         defaults={defaults}
         onCancel={() => setRoute({ name: 'worker', workerId: worker.id })}
         onSave={(data) => {

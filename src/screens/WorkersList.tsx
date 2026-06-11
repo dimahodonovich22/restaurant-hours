@@ -11,10 +11,10 @@ function plural(n: number, one: string, few: string, many: string): string {
   return many;
 }
 function pluralizeRecords(n: number): string {
-  return plural(n, 'запись', 'записи', 'записей');
+  return plural(n, 'смена', 'смены', 'смен');
 }
 function pluralizeWorkers(n: number): string {
-  return plural(n, 'работник', 'работника', 'работников');
+  return plural(n, 'сотрудник', 'сотрудника', 'сотрудников');
 }
 
 type Props = {
@@ -22,7 +22,7 @@ type Props = {
   onOpenWorker: (id: string) => void;
   onAddWorker: () => void;
   onImport: (state: AppState) => void;
-  onSetOverviewRates: (rates: { hourly: number; perKm: number }) => void;
+  onSetOverviewRates: (rates: { hourly: number }) => void;
 };
 
 export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetOverviewRates }: Props) {
@@ -34,7 +34,7 @@ export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetO
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `worker-hours-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `restaurant-hours-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -59,7 +59,7 @@ export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetO
   return (
     <div className="screen">
       <header className="topbar">
-        <h1>Работники</h1>
+        <h1>Сотрудники</h1>
         <button className="link" onClick={onAddWorker}>+ Добавить</button>
       </header>
 
@@ -67,7 +67,7 @@ export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetO
 
       {state.workers.length === 0 ? (
         <div className="empty">
-          <p>Нет работников.</p>
+          <p>Нет сотрудников.</p>
           <button className="primary" onClick={onAddWorker}>Добавить первого</button>
         </div>
       ) : (
@@ -80,10 +80,10 @@ export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetO
                   <div className="card-name">{w.name}</div>
                   <div className="card-stats">
                     <span>{formatNum(t.hours)} ч</span>
-                    <span>{formatNum(t.km)} км</span>
+                    {t.tips > 0 && <span>💶 €{formatNum(t.tips)}</span>}
                     <span className="pay">€{formatNum(t.pay)}</span>
                   </div>
-                  <div className="card-sub">{t.count} записей</div>
+                  <div className="card-sub">{t.count} {pluralizeRecords(t.count)}</div>
                 </li>
               );
             })}
@@ -94,42 +94,35 @@ export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetO
               (acc, w) => {
                 const t = monthTotal(state.entries, w, month);
                 acc.hours += t.hours;
-                acc.km += t.km;
+                acc.tips += t.tips;
                 acc.count += t.count;
                 return acc;
               },
-              { hours: 0, km: 0, count: 0 },
+              { hours: 0, tips: 0, count: 0 },
             );
             const round = (n: number) => Math.round(n * 100) / 100;
             const rateH = state.overviewRates?.hourly ?? 0;
-            const rateK = state.overviewRates?.perKm ?? 0;
             const payH = round(totals.hours * rateH);
-            const payK = round(totals.km * rateK);
-            const payTotal = round(payH + payK);
+            const payTotal = round(payH + totals.tips);
 
-            const askRate = (which: 'hourly' | 'perKm') => {
-              const current = which === 'hourly' ? rateH : rateK;
-              const label = which === 'hourly' ? 'Ставка €/час' : 'Ставка €/км';
-              const input = prompt(label, current ? String(current) : '');
+            const askRate = () => {
+              const input = prompt('Ставка €/час', rateH ? String(rateH) : '');
               if (input === null) return;
               const val = parseFloat(input.replace(',', '.'));
               if (Number.isNaN(val) || val < 0) {
-                alert('Введите число (например 15 или 0.35)');
+                alert('Введите число (например 15 или 12.5)');
                 return;
               }
-              onSetOverviewRates({
-                hourly: which === 'hourly' ? val : rateH,
-                perKm: which === 'perKm' ? val : rateK,
-              });
+              onSetOverviewRates({ hourly: val });
             };
 
             return (
               <div className="grand-total">
                 <div className="grand-total-label">
-                  Итог за {formatMonthLabel(month).toLowerCase()} · все работники
+                  Итог за {formatMonthLabel(month).toLowerCase()} · все сотрудники
                 </div>
                 <div className="totals overview-totals">
-                  <button className="overview-cell" onClick={() => askRate('hourly')}>
+                  <button className="overview-cell" onClick={askRate}>
                     <span>{formatNum(round(totals.hours))}</span>
                     <div className="overview-unit">ч</div>
                     <div className="overview-sub">
@@ -139,20 +132,15 @@ export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetO
                       <div className="overview-rate">× €{formatNum(rateH)}/ч</div>
                     )}
                   </button>
-                  <button className="overview-cell" onClick={() => askRate('perKm')}>
-                    <span>{formatNum(round(totals.km))}</span>
-                    <div className="overview-unit">км</div>
-                    <div className="overview-sub">
-                      {rateK > 0 ? `€${formatNum(payK)}` : 'нажмите для ставки'}
-                    </div>
-                    {rateK > 0 && (
-                      <div className="overview-rate">× €{formatNum(rateK)}/км</div>
-                    )}
-                  </button>
+                  <div className="overview-cell overview-cell-static">
+                    <span>€{formatNum(round(totals.tips))}</span>
+                    <div className="overview-unit">чаевые</div>
+                    <div className="overview-sub">за месяц</div>
+                  </div>
                   <div className="pay overview-cell overview-cell-static">
                     <span>€{formatNum(payTotal)}</span>
                     <div className="overview-unit">всего</div>
-                    <div className="overview-sub">часы + км</div>
+                    <div className="overview-sub">зарплата + чаевые</div>
                   </div>
                 </div>
                 <div className="grand-total-sub">

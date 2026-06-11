@@ -5,6 +5,7 @@ import {
   entryHours,
   entryMonthKey,
   entryPay,
+  entryTips,
   formatMonthLabel,
   formatNum,
   monthTotal,
@@ -90,15 +91,19 @@ export function WorkerDetail({
       .sort((a, b) => (a.date < b.date ? -1 : 1))
       .map((e) => {
         const lunch = e.lunch ? '' : ' без обеда';
-        const locs = [e.location, ...(e.extraSegments?.map((s) => s.location) ?? [])].join(' + ');
+        const label = e.comment ? ` ${e.comment}` : '';
         const times = [
           `${e.start}-${e.end}`,
           ...(e.extraSegments?.map((s) => `${s.start}-${s.end}`) ?? []),
         ].join(' · ');
-        return `${ddmm(e.date)} ${locs}${lunch}   ${times}/${formatNum(entryHours(e))}/${formatNum(e.km)}км`;
+        const tip = entryTips(e) > 0 ? ` (чай €${formatNum(entryTips(e))})` : '';
+        return `${ddmm(e.date)}${label}${lunch}   ${times}/${formatNum(entryHours(e))}ч${tip}`;
       });
     lines.push('');
-    lines.push(`Итого: ${formatNum(total.hours)} ч / ${formatNum(total.km)} км / €${formatNum(total.pay)}`);
+    lines.push(
+      `Итого: ${formatNum(total.hours)} ч / зарплата €${formatNum(total.pay)}` +
+        (total.tips > 0 ? ` / чаевые €${formatNum(total.tips)}` : ''),
+    );
     const text = lines.join('\n');
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text).then(
@@ -128,34 +133,29 @@ export function WorkerDetail({
 
       <div className="totals">
         <div><span>{formatNum(total.hours)}</span> ч</div>
-        <div><span>{formatNum(total.km)}</span> км</div>
+        {total.tips > 0 && <div><span>€{formatNum(total.tips)}</span> чай</div>}
         <div className="pay"><span>€{formatNum(total.pay)}</span></div>
       </div>
 
       {visible.length === 0 ? (
-        <div className="empty"><p>Записей нет.</p></div>
+        <div className="empty"><p>Смен нет.</p></div>
       ) : (
         <ul className="entries">
           {visible.map((e) => {
             const h = entryHours(e);
             const pay = entryPay(e, worker);
+            const tip = entryTips(e);
             return (
               <li key={e.id} className="entry-row" onClick={() => onEditEntry(e.id)}>
                 <div className="entry-date">{ddmm(e.date)}</div>
                 <div className="entry-main">
                   <div className="entry-loc">
-                    {e.location}
-                    {e.extraSegments && e.extraSegments.length > 0 && (
-                      <>
-                        {e.extraSegments.map((s, i) => (
-                          <span key={i}>, {s.location}</span>
-                        ))}
-                      </>
-                    )}
+                    {e.comment || 'Смена'}
                     {!e.lunch && <span className="entry-no-lunch">без обеда</span>}
                     {e.multiplier && e.multiplier !== 1 && (
                       <span className="entry-mult">× {e.multiplier}</span>
                     )}
+                    {tip > 0 && <span className="entry-tip">💶 €{formatNum(tip)}</span>}
                     {e.photos && e.photos.length > 0 && (
                       <span className="entry-photo">📎 {e.photos.length}</span>
                     )}
@@ -166,7 +166,7 @@ export function WorkerDetail({
                       <span key={i}> · {s.start}–{s.end}</span>
                     ))}
                     {' / '}
-                    {formatNum(h)} ч / {formatNum(e.km)} км
+                    {formatNum(h)} ч
                   </div>
                 </div>
                 <div className="entry-pay">€{formatNum(pay)}</div>
@@ -240,8 +240,8 @@ export function WorkerDetail({
             >
               <span className="sheet-btn-icon">💼</span>
               <span>
-                <strong>Рабочий день</strong>
-                <small>локация, время, км — идёт в зарплату</small>
+                <strong>Смена</strong>
+                <small>время, чаевые — идёт в зарплату</small>
               </span>
             </button>
             <button
