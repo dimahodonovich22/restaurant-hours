@@ -22,10 +22,9 @@ type Props = {
   onOpenWorker: (id: string) => void;
   onAddWorker: () => void;
   onImport: (state: AppState) => void;
-  onSetOverviewRates: (rates: { hourly: number }) => void;
 };
 
-export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetOverviewRates }: Props) {
+export function WorkersList({ state, onOpenWorker, onAddWorker, onImport }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const month = currentMonthKey();
 
@@ -93,26 +92,13 @@ export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetO
               (acc, w) => {
                 const t = monthTotal(state.entries, w, month);
                 acc.hours += t.hours;
+                acc.pay += t.pay;
                 acc.count += t.count;
                 return acc;
               },
-              { hours: 0, count: 0 },
+              { hours: 0, pay: 0, count: 0 },
             );
             const round = (n: number) => Math.round(n * 100) / 100;
-            const rateH = state.overviewRates?.hourly ?? 0;
-            const payH = round(totals.hours * rateH);
-            const payTotal = payH;
-
-            const askRate = () => {
-              const input = prompt('Ставка €/час', rateH ? String(rateH) : '');
-              if (input === null) return;
-              const val = parseFloat(input.replace(',', '.'));
-              if (Number.isNaN(val) || val < 0) {
-                alert('Введите число (например 15 или 12.5)');
-                return;
-              }
-              onSetOverviewRates({ hourly: val });
-            };
 
             return (
               <div className="grand-total">
@@ -120,20 +106,14 @@ export function WorkersList({ state, onOpenWorker, onAddWorker, onImport, onSetO
                   Итог за {formatMonthLabel(month).toLowerCase()} · все сотрудники
                 </div>
                 <div className="totals overview-totals">
-                  <button className="overview-cell" onClick={askRate}>
+                  <div className="overview-cell overview-cell-static">
                     <span>{formatNum(round(totals.hours))}</span>
-                    <div className="overview-unit">ч</div>
-                    <div className="overview-sub">
-                      {rateH > 0 ? `€${formatNum(payH)}` : 'нажмите для ставки'}
-                    </div>
-                    {rateH > 0 && (
-                      <div className="overview-rate">× €{formatNum(rateH)}/ч</div>
-                    )}
-                  </button>
+                    <div className="overview-unit">часов</div>
+                  </div>
                   <div className="pay overview-cell overview-cell-static">
-                    <span>€{formatNum(payTotal)}</span>
+                    <span>€{formatNum(round(totals.pay))}</span>
                     <div className="overview-unit">всего</div>
-                    <div className="overview-sub">часы × ставка</div>
+                    <div className="overview-sub">зарплата всех смен</div>
                   </div>
                 </div>
                 <div className="grand-total-sub">

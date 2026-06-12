@@ -75,10 +75,6 @@ export function App() {
     setState(next);
   }
 
-  function setOverviewRates(rates: { hourly: number }) {
-    setState((s) => ({ ...s, overviewRates: rates }));
-  }
-
   if (route.name === 'workers') {
     return (
       <WorkersList
@@ -86,7 +82,6 @@ export function App() {
         onOpenWorker={(id) => setRoute({ name: 'worker', workerId: id })}
         onAddWorker={() => setRoute({ name: 'workerForm' })}
         onImport={importState}
-        onSetOverviewRates={setOverviewRates}
       />
     );
   }

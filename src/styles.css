@@ -193,7 +193,10 @@ input, select {
   margin-top: 10px;
 }
 
-.overview-totals { align-items: stretch; }
+.overview-totals {
+  align-items: stretch;
+  grid-template-columns: 1fr 1fr;
+}
 .overview-cell {
   background: var(--surface);
   border: none;
