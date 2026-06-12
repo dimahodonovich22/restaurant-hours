@@ -1,7 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { AppState, Entry, Note, Worker } from './types';
 import { loadState, saveState, uid } from './storage';
 import { ymd } from './calc';
+import {
+  getTeamCode,
+  setTeamCode,
+  clearTeamCode,
+  randomTeamCode,
+  fetchAll,
+  pushRecords,
+  subscribe,
+  type Row,
+  type PushItem,
+} from './sync';
 import { WorkersList } from './screens/WorkersList';
 import { WorkerDetail } from './screens/WorkerDetail';
 import { EntryForm } from './screens/EntryForm';
@@ -17,13 +28,64 @@ type Route =
   | { name: 'noteForm'; workerId: string; noteId?: string }
   | { name: 'report'; workerId: string; monthKey: string };
 
+function applyRow(s: AppState, row: Row): AppState {
+  const key = row.kind === 'worker' ? 'workers' : row.kind === 'entry' ? 'entries' : 'notes';
+  const arr = s[key] as { id: string }[];
+  const without = arr.filter((x) => x.id !== row.id);
+  if (row.deleted) return { ...s, [key]: without };
+  return { ...s, [key]: [...without, row.data] };
+}
+
 export function App() {
   const [state, setState] = useState<AppState>(() => loadState());
   const [route, setRoute] = useState<Route>({ name: 'workers' });
+  const [team, setTeam] = useState<string | null>(() => getTeamCode());
+
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   useEffect(() => {
     saveState(state);
   }, [state]);
+
+  // Облачная синхронизация: подтянуть данные, залить локальные новинки, слушать изменения.
+  useEffect(() => {
+    if (!team) return;
+    let cancelled = false;
+    let unsub = () => {};
+    (async () => {
+      try {
+        const rows = await fetchAll(team);
+        if (cancelled) return;
+        const knownIds = new Set(rows.map((r) => r.id));
+        const active = rows.filter((r) => !r.deleted);
+        const cloud: AppState = {
+          workers: active.filter((r) => r.kind === 'worker').map((r) => r.data as Worker),
+          entries: active.filter((r) => r.kind === 'entry').map((r) => r.data as Entry),
+          notes: active.filter((r) => r.kind === 'note').map((r) => r.data as Note),
+        };
+        // Локальные записи, которых ещё нет в облаке (и не удалены там) — отправить вверх.
+        const local = stateRef.current;
+        const fresh: PushItem[] = [];
+        for (const w of local.workers) if (!knownIds.has(w.id)) { fresh.push({ kind: 'worker', id: w.id, data: w }); cloud.workers.push(w); }
+        for (const e of local.entries) if (!knownIds.has(e.id)) { fresh.push({ kind: 'entry', id: e.id, data: e }); cloud.entries.push(e); }
+        for (const n of local.notes) if (!knownIds.has(n.id)) { fresh.push({ kind: 'note', id: n.id, data: n }); cloud.notes.push(n); }
+        if (fresh.length) await pushRecords(team, fresh);
+        setState(cloud);
+        unsub = subscribe(team, (row) => setState((s) => applyRow(s, row)));
+      } catch (err) {
+        console.error('Ошибка синхронизации', err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      unsub();
+    };
+  }, [team]);
+
+  const push = (items: PushItem[]) => {
+    if (team) pushRecords(team, items).catch((e) => console.error('push', e));
+  };
 
   function upsertWorker(w: Worker) {
     setState((s) => {
@@ -33,14 +95,22 @@ export function App() {
         workers: exists ? s.workers.map((x) => (x.id === w.id ? w : x)) : [...s.workers, w],
       };
     });
+    push([{ kind: 'worker', id: w.id, data: w }]);
   }
 
   function deleteWorker(id: string) {
+    const ents = stateRef.current.entries.filter((e) => e.workerId === id);
+    const nts = stateRef.current.notes.filter((n) => n.workerId === id);
     setState((s) => ({
       workers: s.workers.filter((w) => w.id !== id),
       entries: s.entries.filter((e) => e.workerId !== id),
       notes: s.notes.filter((n) => n.workerId !== id),
     }));
+    push([
+      { kind: 'worker', id, deleted: true },
+      ...ents.map((e): PushItem => ({ kind: 'entry', id: e.id, deleted: true })),
+      ...nts.map((n): PushItem => ({ kind: 'note', id: n.id, deleted: true })),
+    ]);
   }
 
   function upsertEntry(e: Entry) {
@@ -51,10 +121,12 @@ export function App() {
         entries: exists ? s.entries.map((x) => (x.id === e.id ? e : x)) : [...s.entries, e],
       };
     });
+    push([{ kind: 'entry', id: e.id, data: e }]);
   }
 
   function deleteEntry(id: string) {
     setState((s) => ({ ...s, entries: s.entries.filter((e) => e.id !== id) }));
+    push([{ kind: 'entry', id, deleted: true }]);
   }
 
   function upsertNote(n: Note) {
@@ -65,20 +137,58 @@ export function App() {
         notes: exists ? s.notes.map((x) => (x.id === n.id ? n : x)) : [...s.notes, n],
       };
     });
+    push([{ kind: 'note', id: n.id, data: n }]);
   }
 
   function deleteNote(id: string) {
     setState((s) => ({ ...s, notes: s.notes.filter((n) => n.id !== id) }));
+    push([{ kind: 'note', id, deleted: true }]);
   }
 
   function importState(next: AppState) {
     setState(next);
+    push([
+      ...next.workers.map((w): PushItem => ({ kind: 'worker', id: w.id, data: w })),
+      ...next.entries.map((e): PushItem => ({ kind: 'entry', id: e.id, data: e })),
+      ...next.notes.map((n): PushItem => ({ kind: 'note', id: n.id, data: n })),
+    ]);
+  }
+
+  function handleSync() {
+    if (!team) {
+      const input = prompt(
+        'Введите ОБЩИЙ код команды (одинаковый на всех телефонах).\nОставьте пустым — создам новый код.',
+        '',
+      );
+      if (input === null) return;
+      const code = input.trim() || randomTeamCode();
+      setTeamCode(code);
+      setTeam(code);
+      alert(`Синхронизация включена.\n\nКод команды:\n${code}\n\nВведите ЭТОТ ЖЕ код на других телефонах, чтобы видеть общие данные.`);
+    } else {
+      const again = prompt(
+        'Код команды (введите его на других телефонах).\nЧтобы отключить синхронизацию на этом телефоне — сотрите код и нажмите OK.',
+        team,
+      );
+      if (again === null) return;
+      const t = again.trim();
+      if (t === '') {
+        clearTeamCode();
+        setTeam(null);
+        alert('Синхронизация отключена на этом телефоне. Данные остались локально.');
+      } else if (t !== team) {
+        setTeamCode(t);
+        setTeam(t);
+      }
+    }
   }
 
   if (route.name === 'workers') {
     return (
       <WorkersList
         state={state}
+        team={team}
+        onSync={handleSync}
         onOpenWorker={(id) => setRoute({ name: 'worker', workerId: id })}
         onAddWorker={() => setRoute({ name: 'workerForm' })}
         onImport={importState}

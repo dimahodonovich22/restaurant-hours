@@ -197,6 +197,41 @@ input, select {
   align-items: stretch;
   grid-template-columns: 1fr 1fr;
 }
+
+.sync-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+.sync-bar .sync-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #c2c6cc;
+  flex: none;
+}
+.sync-bar.on {
+  color: #1d7a3a;
+  border-color: rgba(29,122,58,0.25);
+  background: linear-gradient(180deg, #f3fbf5 0%, #e9f7ee 100%);
+}
+.sync-bar.on .sync-dot {
+  background: #28a745;
+  box-shadow: 0 0 0 3px rgba(40,167,69,0.18);
+}
 .overview-cell {
   background: var(--surface);
   border: none;

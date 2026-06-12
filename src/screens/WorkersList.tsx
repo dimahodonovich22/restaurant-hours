@@ -19,12 +19,14 @@ function pluralizeWorkers(n: number): string {
 
 type Props = {
   state: AppState;
+  team: string | null;
+  onSync: () => void;
   onOpenWorker: (id: string) => void;
   onAddWorker: () => void;
   onImport: (state: AppState) => void;
 };
 
-export function WorkersList({ state, onOpenWorker, onAddWorker, onImport }: Props) {
+export function WorkersList({ state, team, onSync, onOpenWorker, onAddWorker, onImport }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const month = currentMonthKey();
 
@@ -125,6 +127,11 @@ export function WorkersList({ state, onOpenWorker, onAddWorker, onImport }: Prop
           })()}
         </>
       )}
+
+      <button className={`sync-bar ${team ? 'on' : ''}`} onClick={onSync}>
+        <span className="sync-dot" />
+        {team ? `Синхронизация включена · ${team}` : 'Синхронизация между телефонами'}
+      </button>
 
       <footer className="footer-actions">
         <button className="ghost" onClick={exportBackup}>Скачать backup</button>
