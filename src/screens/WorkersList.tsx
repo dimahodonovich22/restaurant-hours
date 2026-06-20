@@ -11,10 +11,10 @@ function plural(n: number, one: string, few: string, many: string): string {
   return many;
 }
 function pluralizeRecords(n: number): string {
-  return plural(n, 'смена', 'смены', 'смен');
+  return plural(n, 'зміна', 'зміни', 'змін');
 }
 function pluralizeWorkers(n: number): string {
-  return plural(n, 'сотрудник', 'сотрудника', 'сотрудников');
+  return plural(n, 'співробітник', 'співробітники', 'співробітників');
 }
 
 type Props = {
@@ -46,12 +46,12 @@ export function WorkersList({ state, team, onSync, onOpenWorker, onAddWorker, on
       try {
         const parsed = JSON.parse(String(reader.result));
         if (Array.isArray(parsed.workers) && Array.isArray(parsed.entries)) {
-          if (confirm('Заменить текущие данные импортом?')) onImport(parsed);
+          if (confirm('Замінити поточні дані імпортом?')) onImport(parsed);
         } else {
-          alert('Неверный формат файла');
+          alert('Невірний формат файлу');
         }
       } catch {
-        alert('Не удалось прочитать файл');
+        alert('Не вдалося прочитати файл');
       }
     };
     reader.readAsText(file);
@@ -60,16 +60,16 @@ export function WorkersList({ state, team, onSync, onOpenWorker, onAddWorker, on
   return (
     <div className="screen">
       <header className="topbar">
-        <h1>Сотрудники</h1>
-        <button className="link" onClick={onAddWorker}>+ Добавить</button>
+        <h1>Співробітники</h1>
+        <button className="link" onClick={onAddWorker}>+ Додати</button>
       </header>
 
       <div className="month-label">{formatMonthLabel(month)}</div>
 
       {state.workers.length === 0 ? (
         <div className="empty">
-          <p>Нет сотрудников.</p>
-          <button className="primary" onClick={onAddWorker}>Добавить первого</button>
+          <p>Немає співробітників.</p>
+          <button className="primary" onClick={onAddWorker}>Додати першого</button>
         </div>
       ) : (
         <>
@@ -80,7 +80,7 @@ export function WorkersList({ state, team, onSync, onOpenWorker, onAddWorker, on
                 <li key={w.id} className="card" onClick={() => onOpenWorker(w.id)}>
                   <div className="card-name">{w.name}</div>
                   <div className="card-stats">
-                    <span>{formatNum(t.hours)} ч</span>
+                    <span>{formatNum(t.hours)} год</span>
                     <span className="pay">€{formatNum(t.pay)}</span>
                   </div>
                   <div className="card-sub">{t.count} {pluralizeRecords(t.count)}</div>
@@ -105,17 +105,17 @@ export function WorkersList({ state, team, onSync, onOpenWorker, onAddWorker, on
             return (
               <div className="grand-total">
                 <div className="grand-total-label">
-                  Итог за {formatMonthLabel(month).toLowerCase()} · все сотрудники
+                  Підсумок за {formatMonthLabel(month).toLowerCase()} · усі співробітники
                 </div>
                 <div className="totals overview-totals">
                   <div className="overview-cell overview-cell-static">
                     <span>{formatNum(round(totals.hours))}</span>
-                    <div className="overview-unit">часов</div>
+                    <div className="overview-unit">годин</div>
                   </div>
                   <div className="pay overview-cell overview-cell-static">
                     <span>€{formatNum(round(totals.pay))}</span>
-                    <div className="overview-unit">всего</div>
-                    <div className="overview-sub">зарплата всех смен</div>
+                    <div className="overview-unit">всього</div>
+                    <div className="overview-sub">зарплата всіх змін</div>
                   </div>
                 </div>
                 <div className="grand-total-sub">
@@ -130,12 +130,12 @@ export function WorkersList({ state, team, onSync, onOpenWorker, onAddWorker, on
 
       <button className={`sync-bar ${team ? 'on' : ''}`} onClick={onSync}>
         <span className="sync-dot" />
-        {team ? `Синхронизация включена · ${team}` : 'Синхронизация между телефонами'}
+        {team ? `Синхронізація увімкнена · ${team}` : 'Синхронізація між телефонами'}
       </button>
 
       <footer className="footer-actions">
-        <button className="ghost" onClick={exportBackup}>Скачать backup</button>
-        <button className="ghost" onClick={() => fileRef.current?.click()}>Импорт</button>
+        <button className="ghost" onClick={exportBackup}>Завантажити backup</button>
+        <button className="ghost" onClick={() => fileRef.current?.click()}>Імпорт</button>
         <input
           ref={fileRef}
           type="file"

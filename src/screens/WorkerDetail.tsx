@@ -89,24 +89,24 @@ export function WorkerDetail({
       .slice()
       .sort((a, b) => (a.date < b.date ? -1 : 1))
       .map((e) => {
-        const lunch = e.lunch ? '' : ' без обеда';
+        const lunch = e.lunch ? '' : ' без обіду';
         const label = e.comment ? ` ${e.comment}` : '';
         const times = [
           `${e.start}-${e.end}`,
           ...(e.extraSegments?.map((s) => `${s.start}-${s.end}`) ?? []),
         ].join(' · ');
-        return `${ddmm(e.date)}${label}${lunch}   ${times}/${formatNum(entryHours(e))}ч`;
+        return `${ddmm(e.date)}${label}${lunch}   ${times}/${formatNum(entryHours(e))}год`;
       });
     lines.push('');
-    lines.push(`Итого: ${formatNum(total.hours)} ч / €${formatNum(total.pay)}`);
+    lines.push(`Разом: ${formatNum(total.hours)} год / €${formatNum(total.pay)}`);
     const text = lines.join('\n');
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text).then(
-        () => alert('Скопировано в буфер обмена'),
-        () => prompt('Скопируй вручную:', text),
+        () => alert('Скопійовано в буфер обміну'),
+        () => prompt('Скопіюйте вручну:', text),
       );
     } else {
-      prompt('Скопируй вручную:', text);
+      prompt('Скопіюйте вручну:', text);
     }
   }
 
@@ -127,12 +127,12 @@ export function WorkerDetail({
       </div>
 
       <div className="totals">
-        <div><span>{formatNum(total.hours)}</span> ч</div>
+        <div><span>{formatNum(total.hours)}</span> год</div>
         <div className="pay"><span>€{formatNum(total.pay)}</span></div>
       </div>
 
       {visible.length === 0 ? (
-        <div className="empty"><p>Смен нет.</p></div>
+        <div className="empty"><p>Змін немає.</p></div>
       ) : (
         <ul className="entries">
           {visible.map((e) => {
@@ -143,8 +143,8 @@ export function WorkerDetail({
                 <div className="entry-date">{ddmm(e.date)}</div>
                 <div className="entry-main">
                   <div className="entry-loc">
-                    {e.comment || 'Смена'}
-                    {!e.lunch && <span className="entry-no-lunch">без обеда</span>}
+                    {e.comment || 'Зміна'}
+                    {!e.lunch && <span className="entry-no-lunch">без обіду</span>}
                     {e.multiplier && e.multiplier !== 1 && (
                       <span className="entry-mult">× {e.multiplier}</span>
                     )}
@@ -155,7 +155,7 @@ export function WorkerDetail({
                       <span key={i}> · {s.start}–{s.end}</span>
                     ))}
                     {' / '}
-                    {formatNum(h)} ч
+                    {formatNum(h)} год
                   </div>
                 </div>
                 <div className="entry-pay">€{formatNum(pay)}</div>
@@ -167,18 +167,18 @@ export function WorkerDetail({
 
       {(visibleNotes.length > 0 || noteTotals.minus > 0 || noteTotals.plus > 0) && (
         <div className="notes-section">
-          <div className="section-title">Заметки за {formatMonthLabel(month)}</div>
+          <div className="section-title">Нотатки за {formatMonthLabel(month)}</div>
           <div className="note-totals">
             <div className="note-total minus">
-              <div className="note-total-label">Я должен</div>
+              <div className="note-total-label">Я винен</div>
               <div className="note-total-value">€{formatNum(noteTotals.minus)}</div>
             </div>
             <div className="note-total plus">
-              <div className="note-total-label">Мне должны</div>
+              <div className="note-total-label">Мені винні</div>
               <div className="note-total-value">€{formatNum(noteTotals.plus)}</div>
             </div>
             <div className={`note-total net ${noteTotals.net >= 0 ? 'pos' : 'neg'}`}>
-              <div className="note-total-label">Итог</div>
+              <div className="note-total-label">Підсумок</div>
               <div className="note-total-value">
                 {noteTotals.net >= 0 ? '+' : ''}€{formatNum(Math.abs(noteTotals.net))}
               </div>
@@ -198,7 +198,7 @@ export function WorkerDetail({
                       )}
                     </div>
                     <div className="entry-time">
-                      {n.direction === 'minus' ? 'я должен' : 'мне должны'}
+                      {n.direction === 'minus' ? 'я винен' : 'мені винні'}
                     </div>
                   </div>
                   <div className={`entry-pay note-pay ${n.direction}`}>
@@ -212,14 +212,14 @@ export function WorkerDetail({
       )}
 
       <footer className="footer-actions">
-        <button className="ghost" onClick={() => setMenuOpen(true)}>Экспорт</button>
-        <button className="primary" onClick={() => setAddMenuOpen(true)}>+ Добавить</button>
+        <button className="ghost" onClick={() => setMenuOpen(true)}>Експорт</button>
+        <button className="primary" onClick={() => setAddMenuOpen(true)}>+ Додати</button>
       </footer>
 
       {addMenuOpen && (
         <div className="sheet-backdrop" onClick={() => setAddMenuOpen(false)}>
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="sheet-title">Что добавить</div>
+            <div className="sheet-title">Що додати</div>
             <button
               className="sheet-btn"
               onClick={() => {
@@ -229,8 +229,8 @@ export function WorkerDetail({
             >
               <span className="sheet-btn-icon">💼</span>
               <span>
-                <strong>Смена</strong>
-                <small>время, чаевые — идёт в зарплату</small>
+                <strong>Зміна</strong>
+                <small>час, ставка — йде в зарплату</small>
               </span>
             </button>
             <button
@@ -242,11 +242,11 @@ export function WorkerDetail({
             >
               <span className="sheet-btn-icon">📝</span>
               <span>
-                <strong>Заметка</strong>
-                <small>заправка, расходы — отдельный учёт</small>
+                <strong>Нотатка</strong>
+                <small>аванс, витрати — окремий облік</small>
               </span>
             </button>
-            <button className="sheet-cancel" onClick={() => setAddMenuOpen(false)}>Отмена</button>
+            <button className="sheet-cancel" onClick={() => setAddMenuOpen(false)}>Скасувати</button>
           </div>
         </div>
       )}
@@ -254,7 +254,7 @@ export function WorkerDetail({
       {menuOpen && (
         <div className="sheet-backdrop" onClick={() => setMenuOpen(false)}>
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="sheet-title">Экспорт за {formatMonthLabel(month)}</div>
+            <div className="sheet-title">Експорт за {formatMonthLabel(month)}</div>
             <button
               className="sheet-btn"
               onClick={() => {
@@ -264,8 +264,8 @@ export function WorkerDetail({
             >
               <span className="sheet-btn-icon">📄</span>
               <span>
-                <strong>PDF (для начальника)</strong>
-                <small>красиво оформленный отчёт</small>
+                <strong>PDF (для керівника)</strong>
+                <small>гарно оформлений звіт</small>
               </span>
             </button>
             <button
@@ -278,7 +278,7 @@ export function WorkerDetail({
               <span className="sheet-btn-icon">📊</span>
               <span>
                 <strong>Excel (.xlsx)</strong>
-                <small>таблица для редактирования</small>
+                <small>таблиця для редагування</small>
               </span>
             </button>
             <button
@@ -290,11 +290,11 @@ export function WorkerDetail({
             >
               <span className="sheet-btn-icon">📋</span>
               <span>
-                <strong>Текст в буфер</strong>
-                <small>как в ваших заметках</small>
+                <strong>Текст у буфер</strong>
+                <small>як у ваших нотатках</small>
               </span>
             </button>
-            <button className="sheet-cancel" onClick={() => setMenuOpen(false)}>Отмена</button>
+            <button className="sheet-cancel" onClick={() => setMenuOpen(false)}>Скасувати</button>
           </div>
         </div>
       )}

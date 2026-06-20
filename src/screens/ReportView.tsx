@@ -25,9 +25,9 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
   const total = monthTotal(entries, worker, monthKey);
 
   useEffect(() => {
-    document.title = `Отчёт ${worker.name} — ${formatMonthLabel(monthKey)}`;
+    document.title = `Звіт ${worker.name} — ${formatMonthLabel(monthKey)}`;
     return () => {
-      document.title = 'Учёт ресторан';
+      document.title = 'Облік ресторан';
     };
   }, [worker.name, monthKey]);
 
@@ -39,23 +39,23 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
     <div className="report-screen">
       <header className="topbar no-print">
         <button className="link" onClick={onBack}>‹ Назад</button>
-        <h1>Отчёт</h1>
-        <button className="link" onClick={handlePrint}>Печать</button>
+        <h1>Звіт</h1>
+        <button className="link" onClick={handlePrint}>Друк</button>
       </header>
 
       <div className="report-hint no-print">
-        Нажмите «Печать», затем в диалоге Safari выберите <strong>«Сохранить в Файлы»</strong> или
-        отправьте PDF напрямую через AirDrop / Telegram / почту.
+        Натисніть «Друк», потім у діалозі Safari виберіть <strong>«Зберегти у Файли»</strong> або
+        надішліть PDF напряму через AirDrop / Telegram / пошту.
       </div>
 
       <article className="report">
         <div className="report-header">
           <div>
-            <h1 className="report-title">Отчёт о работе</h1>
+            <h1 className="report-title">Звіт про роботу</h1>
             <div className="report-period">{formatMonthLabel(monthKey)}</div>
           </div>
           <div className="report-worker">
-            <div className="report-worker-label">Сотрудник</div>
+            <div className="report-worker-label">Співробітник</div>
             <div className="report-worker-name">{worker.name}</div>
           </div>
         </div>
@@ -64,11 +64,11 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
           <thead>
             <tr>
               <th>Дата</th>
-              <th>Участок</th>
-              <th>Время</th>
-              <th>Обед</th>
-              <th className="num">Часы</th>
-              <th className="num">Сумма €</th>
+              <th>Ділянка</th>
+              <th>Час</th>
+              <th>Обід</th>
+              <th className="num">Години</th>
+              <th className="num">Сума €</th>
             </tr>
           </thead>
           <tbody>
@@ -84,7 +84,7 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
                   <td className="nowrap">{ddmm(e.date)}</td>
                   <td>{e.comment ?? ''}</td>
                   <td className="nowrap">{times}</td>
-                  <td>{e.lunch ? '30 мин' : '—'}</td>
+                  <td>{e.lunch ? '30 хв' : '—'}</td>
                   <td className="num">{formatNum(h)}</td>
                   <td className="num">{formatNum(sum)}</td>
                 </tr>
@@ -93,7 +93,7 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={4}>ИТОГО</td>
+              <td colSpan={4}>РАЗОМ</td>
               <td className="num">{formatNum(total.hours)}</td>
               <td className="num">{formatNum(total.pay)}</td>
             </tr>
@@ -102,22 +102,22 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
 
         <div className="report-summary">
           <div className="summary-block">
-            <div className="summary-label">Всего часов</div>
+            <div className="summary-label">Усього годин</div>
             <div className="summary-value">{formatNum(total.hours)}</div>
           </div>
           <div className="summary-block accent">
-            <div className="summary-label">К выплате</div>
+            <div className="summary-label">До виплати</div>
             <div className="summary-value">€{formatNum(total.pay)}</div>
           </div>
         </div>
 
         <div className="report-footer">
-          Сформировано {new Date().toLocaleDateString('ru-RU')}
+          Сформовано {new Date().toLocaleDateString('uk-UA')}
         </div>
       </article>
 
       <div className="footer-actions no-print">
-        <button className="primary" onClick={handlePrint}>Сохранить как PDF</button>
+        <button className="primary" onClick={handlePrint}>Зберегти як PDF</button>
       </div>
     </div>
   );

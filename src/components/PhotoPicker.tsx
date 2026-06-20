@@ -49,9 +49,9 @@ export function PhotoPicker({ photos, onChange }: Props) {
                 className="photo-remove"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (confirm('Удалить фото?')) remove(i);
+                  if (confirm('Видалити фото?')) remove(i);
                 }}
-                aria-label="Удалить фото"
+                aria-label="Видалити фото"
               >
                 ×
               </button>
@@ -79,7 +79,7 @@ export function PhotoPicker({ photos, onChange }: Props) {
         </button>
       </div>
 
-      {busy && <div className="photo-busy">Обработка...</div>}
+      {busy && <div className="photo-busy">Обробка...</div>}
 
       <input
         ref={cameraRef}

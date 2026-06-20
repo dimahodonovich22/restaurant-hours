@@ -23,35 +23,35 @@ export function WorkerForm({ existing, onCancel, onSave, onDelete }: Props) {
   return (
     <div className="screen">
       <header className="topbar">
-        <button className="link" onClick={onCancel}>Отмена</button>
-        <h1>{existing ? 'Сотрудник' : 'Новый сотрудник'}</h1>
-        <button className="link" disabled={!canSave} onClick={handleSave}>Сохранить</button>
+        <button className="link" onClick={onCancel}>Скасувати</button>
+        <h1>{existing ? 'Співробітник' : 'Новий співробітник'}</h1>
+        <button className="link" disabled={!canSave} onClick={handleSave}>Зберегти</button>
       </header>
 
       <div className="form">
         <label className="field">
-          <span>Имя</span>
+          <span>Ім'я</span>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Например: Роман"
+            placeholder="Наприклад: Роман"
             autoFocus
           />
         </label>
 
         <div className="form-hint">
-          Ставка €/ч задаётся при добавлении каждой смены — она подставляется из последней смены.
+          Ставка €/год задається при додаванні кожної зміни — вона підставляється з останньої зміни.
         </div>
 
         {onDelete && (
           <button
             className="danger"
             onClick={() => {
-              if (confirm('Удалить сотрудника и все его смены?')) onDelete();
+              if (confirm('Видалити співробітника та всі його зміни?')) onDelete();
             }}
           >
-            Удалить сотрудника
+            Видалити співробітника
           </button>
         )}
       </div>

@@ -19,11 +19,11 @@ export function exportExcel(worker: Worker, entries: Entry[], monthKey: string):
     ].join(' · ');
     return {
       Дата: ddmm(e.date),
-      Участок: e.comment ?? '',
-      Время: times,
-      Обед: e.lunch ? '30 мин' : 'без обеда',
-      'Часы': hours,
-      'Сумма €': sum,
+      Ділянка: e.comment ?? '',
+      Час: times,
+      Обід: e.lunch ? '30 хв' : 'без обіду',
+      'Години': hours,
+      'Сума €': sum,
     };
   });
 
@@ -31,11 +31,11 @@ export function exportExcel(worker: Worker, entries: Entry[], monthKey: string):
 
   rows.push({
     Дата: '',
-    Участок: 'ИТОГО',
-    Время: '',
-    Обед: '',
-    Часы: Math.round(totalHours * 100) / 100,
-    'Сумма €': totalPay,
+    Ділянка: 'РАЗОМ',
+    Час: '',
+    Обід: '',
+    Години: Math.round(totalHours * 100) / 100,
+    'Сума €': totalPay,
   });
 
   const ws = XLSX.utils.json_to_sheet(rows);

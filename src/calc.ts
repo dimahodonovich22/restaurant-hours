@@ -82,7 +82,7 @@ export function formatNum(n: number): string {
 
 export function formatMonthLabel(monthKey: string): string {
   const [y, m] = monthKey.split('-').map(Number);
-  const months = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  const months = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
   return `${months[m - 1]} ${y}`;
 }
 

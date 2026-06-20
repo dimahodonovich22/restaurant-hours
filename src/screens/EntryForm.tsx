@@ -93,9 +93,9 @@ export function EntryForm({
   return (
     <div className="screen">
       <header className="topbar">
-        <button className="link" onClick={onCancel}>Отмена</button>
-        <h1>{existing ? 'Редактировать' : 'Новая смена'}</h1>
-        <button className="link" disabled={!canSave} onClick={handleSave}>Сохранить</button>
+        <button className="link" onClick={onCancel}>Скасувати</button>
+        <h1>{existing ? 'Редагувати' : 'Нова зміна'}</h1>
+        <button className="link" disabled={!canSave} onClick={handleSave}>Зберегти</button>
       </header>
 
       <div className="form-sub">{worker.name}</div>
@@ -108,11 +108,11 @@ export function EntryForm({
 
         <div className="field-row">
           <label className="field">
-            <span>Начало</span>
+            <span>Початок</span>
             <input type="time" value={start} onChange={(e) => setStart(e.target.value)} />
           </label>
           <label className="field">
-            <span>Конец</span>
+            <span>Кінець</span>
             <input type="time" value={end} onChange={(e) => setEnd(e.target.value)} />
           </label>
         </div>
@@ -120,14 +120,14 @@ export function EntryForm({
         {extraSegments.map((seg, i) => (
           <div key={i} className="segment">
             <div className="segment-header">
-              <span>Отрезок {i + 2}</span>
+              <span>Відрізок {i + 2}</span>
               <button type="button" className="segment-remove" onClick={() => removeSegment(i)}>
-                Удалить
+                Видалити
               </button>
             </div>
             <div className="field-row">
               <label className="field">
-                <span>Начало</span>
+                <span>Початок</span>
                 <input
                   type="time"
                   value={seg.start}
@@ -135,7 +135,7 @@ export function EntryForm({
                 />
               </label>
               <label className="field">
-                <span>Конец</span>
+                <span>Кінець</span>
                 <input
                   type="time"
                   value={seg.end}
@@ -147,16 +147,16 @@ export function EntryForm({
         ))}
 
         <button type="button" className="ghost add-segment" onClick={addSegment}>
-          + Добавить отрезок (разрыв смены)
+          + Додати відрізок (розрив зміни)
         </button>
 
         <label className="field-check">
           <input type="checkbox" checked={lunch} onChange={(e) => setLunch(e.target.checked)} />
-          <span>Обед 30 мин</span>
+          <span>Обід 30 хв</span>
         </label>
 
         <div className="field">
-          <span>Коэффициент часов</span>
+          <span>Коефіцієнт годин</span>
           <div className="multi-row">
             <label className={`multi-chip ${multiplier === 1.5 ? 'on' : ''}`}>
               <input
@@ -178,7 +178,7 @@ export function EntryForm({
         </div>
 
         <label className="field">
-          <span>Участок / комментарий</span>
+          <span>Ділянка / коментар</span>
           <input
             type="text"
             list="comments"
@@ -192,7 +192,7 @@ export function EntryForm({
         </label>
 
         <label className="field">
-          <span>Ставка €/ч</span>
+          <span>Ставка €/год</span>
           <input
             type="text"
             inputMode="decimal"
@@ -202,13 +202,13 @@ export function EntryForm({
         </label>
 
         <div className="preview">
-          <div>Чистое время: <strong>{formatNum(hours)} ч</strong></div>
+          <div>Чистий час: <strong>{formatNum(hours)} год</strong></div>
           <div className="preview-pay">Зарплата: <strong>€{formatNum(pay)}</strong></div>
         </div>
 
         {onDuplicate && (
           <button className="ghost" onClick={onDuplicate}>
-            Дублировать смену
+            Дублювати зміну
           </button>
         )}
 
@@ -216,10 +216,10 @@ export function EntryForm({
           <button
             className="danger"
             onClick={() => {
-              if (confirm('Удалить смену?')) onDelete();
+              if (confirm('Видалити зміну?')) onDelete();
             }}
           >
-            Удалить смену
+            Видалити зміну
           </button>
         )}
       </div>

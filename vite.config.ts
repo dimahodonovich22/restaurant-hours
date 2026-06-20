@@ -13,9 +13,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'Учёт ресторан',
+        name: 'Облік ресторан',
         short_name: 'Ресторан',
-        description: 'Учёт рабочих часов и километров',
+        description: 'Облік робочих годин у ресторані',
         theme_color: '#f5f5f7',
         background_color: '#ffffff',
         display: 'standalone',

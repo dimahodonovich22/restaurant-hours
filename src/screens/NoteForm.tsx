@@ -42,9 +42,9 @@ export function NoteForm({ worker, existing, onCancel, onSave, onDelete }: Props
   return (
     <div className="screen">
       <header className="topbar">
-        <button className="link" onClick={onCancel}>Отмена</button>
-        <h1>{existing ? 'Заметка' : 'Новая заметка'}</h1>
-        <button className="link" disabled={!canSave} onClick={handleSave}>Сохранить</button>
+        <button className="link" onClick={onCancel}>Скасувати</button>
+        <h1>{existing ? 'Нотатка' : 'Нова нотатка'}</h1>
+        <button className="link" disabled={!canSave} onClick={handleSave}>Зберегти</button>
       </header>
 
       <div className="form-sub">{worker.name}</div>
@@ -56,7 +56,7 @@ export function NoteForm({ worker, existing, onCancel, onSave, onDelete }: Props
         </label>
 
         <div className="field">
-          <span>Направление</span>
+          <span>Напрямок</span>
           <div className="multi-row">
             <label className={`multi-chip ${direction === 'minus' ? 'on minus' : ''}`}>
               <input
@@ -65,7 +65,7 @@ export function NoteForm({ worker, existing, onCancel, onSave, onDelete }: Props
                 checked={direction === 'minus'}
                 onChange={() => setDirection('minus')}
               />
-              <span>Я должен</span>
+              <span>Я винен</span>
             </label>
             <label className={`multi-chip ${direction === 'plus' ? 'on plus' : ''}`}>
               <input
@@ -74,13 +74,13 @@ export function NoteForm({ worker, existing, onCancel, onSave, onDelete }: Props
                 checked={direction === 'plus'}
                 onChange={() => setDirection('plus')}
               />
-              <span>Мне должны</span>
+              <span>Мені винні</span>
             </label>
           </div>
         </div>
 
         <label className="field">
-          <span>Сумма €</span>
+          <span>Сума €</span>
           <input
             type="text"
             inputMode="decimal"
@@ -92,11 +92,11 @@ export function NoteForm({ worker, existing, onCancel, onSave, onDelete }: Props
         </label>
 
         <label className="field">
-          <span>Описание</span>
+          <span>Опис</span>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Например: аванс, штраф, разбитая посуда"
+            placeholder="Наприклад: аванс, штраф, розбитий посуд"
             rows={3}
           />
         </label>
@@ -104,17 +104,17 @@ export function NoteForm({ worker, existing, onCancel, onSave, onDelete }: Props
         <PhotoPicker photos={photos} onChange={setPhotos} />
 
         <div className="form-hint">
-          Заметки <strong>не добавляются автоматически</strong> в сумму к выплате за работу — они учитываются отдельно. В конце месяца вы увидите два итога.
+          Нотатки <strong>не додаються автоматично</strong> до суми виплати за роботу — вони враховуються окремо. Наприкінці місяця ви побачите два підсумки.
         </div>
 
         {onDelete && (
           <button
             className="danger"
             onClick={() => {
-              if (confirm('Удалить заметку?')) onDelete();
+              if (confirm('Видалити нотатку?')) onDelete();
             }}
           >
-            Удалить заметку
+            Видалити нотатку
           </button>
         )}
       </div>
