@@ -89,13 +89,12 @@ export function WorkerDetail({
       .slice()
       .sort((a, b) => (a.date < b.date ? -1 : 1))
       .map((e) => {
-        const lunch = e.lunch ? '' : ' без обіду';
         const label = e.comment ? ` ${e.comment}` : '';
         const times = [
           `${e.start}-${e.end}`,
           ...(e.extraSegments?.map((s) => `${s.start}-${s.end}`) ?? []),
         ].join(' · ');
-        return `${ddmm(e.date)}${label}${lunch}   ${times}/${formatNum(entryHours(e))}год`;
+        return `${ddmm(e.date)}${label}   ${times}/${formatNum(entryHours(e))}год`;
       });
     lines.push('');
     lines.push(`Разом: ${formatNum(total.hours)} год / €${formatNum(total.pay)}`);
@@ -144,10 +143,6 @@ export function WorkerDetail({
                 <div className="entry-main">
                   <div className="entry-loc">
                     {e.comment || 'Зміна'}
-                    {!e.lunch && <span className="entry-no-lunch">без обіду</span>}
-                    {e.multiplier && e.multiplier !== 1 && (
-                      <span className="entry-mult">× {e.multiplier}</span>
-                    )}
                   </div>
                   <div className="entry-time">
                     {e.start}–{e.end}

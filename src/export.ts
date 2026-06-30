@@ -21,7 +21,6 @@ export function exportExcel(worker: Worker, entries: Entry[], monthKey: string):
       Дата: ddmm(e.date),
       Ділянка: e.comment ?? '',
       Час: times,
-      Обід: e.lunch ? '30 хв' : 'без обіду',
       'Години': hours,
       'Сума €': sum,
     };
@@ -33,7 +32,6 @@ export function exportExcel(worker: Worker, entries: Entry[], monthKey: string):
     Дата: '',
     Ділянка: 'РАЗОМ',
     Час: '',
-    Обід: '',
     Години: Math.round(totalHours * 100) / 100,
     'Сума €': totalPay,
   });
@@ -41,16 +39,15 @@ export function exportExcel(worker: Worker, entries: Entry[], monthKey: string):
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [
     { wch: 8 },  // дата
-    { wch: 16 }, // участок
-    { wch: 18 }, // время
-    { wch: 12 }, // обед
-    { wch: 8 },  // часы
-    { wch: 12 }, // сумма
+    { wch: 16 }, // ділянка
+    { wch: 18 }, // час
+    { wch: 8 },  // години
+    { wch: 12 }, // сума
   ];
 
   // Жирная нижняя строка с итогами
   const lastRow = rows.length + 1; // +1 для заголовка
-  ['A','B','C','D','E','F'].forEach((col) => {
+  ['A','B','C','D','E'].forEach((col) => {
     const cell = ws[`${col}${lastRow}`];
     if (cell) {
       cell.s = { font: { bold: true } };

@@ -66,7 +66,6 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
               <th>Дата</th>
               <th>Ділянка</th>
               <th>Час</th>
-              <th>Обід</th>
               <th className="num">Години</th>
               <th className="num">Сума €</th>
             </tr>
@@ -84,7 +83,6 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
                   <td className="nowrap">{ddmm(e.date)}</td>
                   <td>{e.comment ?? ''}</td>
                   <td className="nowrap">{times}</td>
-                  <td>{e.lunch ? '30 хв' : '—'}</td>
                   <td className="num">{formatNum(h)}</td>
                   <td className="num">{formatNum(sum)}</td>
                 </tr>
@@ -93,7 +91,7 @@ export function ReportView({ worker, entries, monthKey, onBack }: Props) {
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={4}>РАЗОМ</td>
+              <td colSpan={3}>РАЗОМ</td>
               <td className="num">{formatNum(total.hours)}</td>
               <td className="num">{formatNum(total.pay)}</td>
             </tr>

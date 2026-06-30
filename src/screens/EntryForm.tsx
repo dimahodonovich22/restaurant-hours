@@ -27,11 +27,13 @@ export function EntryForm({
   const [comment, setComment] = useState(existing?.comment ?? '');
   const [start, setStart] = useState(existing?.start ?? '08:00');
   const [end, setEnd] = useState(existing?.end ?? '16:30');
-  const [lunch, setLunch] = useState(existing?.lunch ?? true);
+  // Обед и коэффициент убраны из интерфейса. Для уже сохранённых смен значения
+  // сохраняются как есть (чтобы не пересчитать старые данные), для новых — выключены.
+  const lunch = existing?.lunch ?? false;
+  const multiplier = existing?.multiplier ?? 1;
   const [hourly, setHourly] = useState<string>(
     String(existing?.hourly ?? defaults.hourly),
   );
-  const [multiplier, setMultiplier] = useState<number>(existing?.multiplier ?? 1);
   const [extraSegments, setExtraSegments] = useState<Segment[]>(
     existing?.extraSegments ?? [],
   );
@@ -149,33 +151,6 @@ export function EntryForm({
         <button type="button" className="ghost add-segment" onClick={addSegment}>
           + Додати відрізок (розрив зміни)
         </button>
-
-        <label className="field-check">
-          <input type="checkbox" checked={lunch} onChange={(e) => setLunch(e.target.checked)} />
-          <span>Обід 30 хв</span>
-        </label>
-
-        <div className="field">
-          <span>Коефіцієнт годин</span>
-          <div className="multi-row">
-            <label className={`multi-chip ${multiplier === 1.5 ? 'on' : ''}`}>
-              <input
-                type="checkbox"
-                checked={multiplier === 1.5}
-                onChange={(e) => setMultiplier(e.target.checked ? 1.5 : 1)}
-              />
-              <span>× 1.5</span>
-            </label>
-            <label className={`multi-chip ${multiplier === 2 ? 'on' : ''}`}>
-              <input
-                type="checkbox"
-                checked={multiplier === 2}
-                onChange={(e) => setMultiplier(e.target.checked ? 2 : 1)}
-              />
-              <span>× 2</span>
-            </label>
-          </div>
-        </div>
 
         <label className="field">
           <span>Ділянка / коментар</span>
